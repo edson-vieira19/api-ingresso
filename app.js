@@ -16,7 +16,8 @@ connectDB();
 
 app.use("/api/users", userRoutes);
 app.use("/api/tickets", ticketRoutes);
-app.use("/api/install", installRoute);
+
+//app.use("/api/install", installRoute);  // instala um administrador inicial
 
 app.get("/", (req, res) => {
     res.send("API rodando!");
