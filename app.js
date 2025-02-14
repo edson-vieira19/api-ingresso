@@ -3,6 +3,7 @@ const app = express()
 const connectDB = require("./config/db");
 
 const userRoutes = require("./routes/userRoutes");
+const ticketRoutes = require("./routes/ticketRoutes");
 
 require('dotenv').config();
 const PORT = process.env.PORT || 3000;
@@ -13,7 +14,7 @@ connectDB();
 
 
 app.use("/api/users", userRoutes);
-
+app.use("/api/tickets", ticketRoutes);
 
 app.get("/", (req, res) => {
     res.send("API rodando!");
