@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ingressos Disponíveis</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Ingressos Disponíveis</h1>
+        <div id="userActions">
+            <!-- Botão "Cadastrar Novo" aparece apenas para admin -->
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Nome</th>
+                    <th>Preço</th>
+                    <th>Quantidade Disponível</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody id="ticketList">
+                <!-- Os ingressos serão inseridos aqui -->
+            </tbody>
+        </table>
+        <button id="buyButton" style="display: none;">Comprar</button>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", async () => {
+            const token = localStorage.getItem("token");
+            if (!token) {
+                window.location.href = "/login";
+                return;
+            }
+
+            // Obtém ingressos da API
+            const response = await fetch("/api/tickets", {
+                headers: { "Authorization": `Bearer ${token}` }
+            });
+            const tickets = await response.json();
+            
+            const userRole = parseJwt(token).role; // Obtém a role do usuário
+            const ticketList = document.getElementById("ticketList");
+            const userActions = document.getElementById("userActions");
+
+            let cart = []; // Carrinho de compras
+
+            tickets.forEach(ticket => {
+                const row = document.createElement("tr");
+                row.innerHTML = `
+                    <td>${ticket.name}</td>
+                    <td>R$ ${ticket.price.toFixed(2)}</td>
+                    <td>${ticket.quantity}</td>
+                    <td>
+                        ${userRole === "admin" ? `
+                            <button onclick="editTicket('${ticket._id}')">Editar</button>
+                            <button onclick="deleteTicket('${ticket._id}')">Excluir</button>
+                        ` : `
+                            <button onclick="addToCart('${ticket._id}')">+</button>
+                        `}
+                    </td>
+                `;
+                ticketList.appendChild(row);
+            });
+
+            // Se for admin, exibir botão para cadastrar novo ingresso
+            if (userRole === "admin") {
+                const addButton = document.createElement("button");
+                addButton.innerText = "Cadastrar Novo";
+                addButton.onclick = () => window.location.href = "/tickets/new";
+                userActions.appendChild(addButton);
+            }
+
+            // Se for usuário comum, exibir botão de compra
+            if (userRole !== "admin") {
+                document.getElementById("buyButton").style.display = "block";
+                document.getElementById("buyButton").addEventListener("click", async () => {
+                    if (cart.length === 0) {
+                        alert("Adicione ingressos ao carrinho antes de comprar!");
+                        return;
+                    }
+
+                    const purchaseResponse = await fetch("/api/purchases", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "Authorization": `Bearer ${token}`
+                        },
+                        body: JSON.stringify({ tickets: cart })
+                    });
+
+                    if (purchaseResponse.ok) {
+                        alert("Compra realizada com sucesso!");
+                        window.location.reload();
+                    } else {
+                        alert("Erro ao realizar compra.");
+                    }
+                });
+            }
+
+            window.addToCart = (id) => {
+                cart.push({ ticketId: id, quantity: 1 });
+                alert("Ingresso adicionado!");
+            };
+
+            window.editTicket = (id) => {
+                window.location.href = `/tickets/edit/${id}`;
+            };
+
+            window.deleteTicket = async (id) => {
+                if (confirm("Tem certeza que deseja excluir este ingresso?")) {
+                    const deleteResponse = await fetch(`/api/tickets/${id}`, {
+                        method: "DELETE",
+                        headers: { "Authorization": `Bearer ${token}` }
+                    });
+
+                    if (deleteResponse.ok) {
+                        alert("Ingresso excluído com sucesso!");
+                        window.location.reload();
+                    } else {
+                        alert("Erro ao excluir ingresso.");
+                    }
+                }
+            };
+
+            function parseJwt(token) {
+                try {
+                    return JSON.parse(atob(token.split(".")[1]));
+                } catch (e) {
+                    return null;
+                }
+            }
+        });
+    </script>
+</body>
+</html>
