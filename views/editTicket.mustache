@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editar Ingresso</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Editar Ingresso</h1>
+        <form id="editTicketForm">
+            <label for="name">Nome:</label>
+            <input type="text" id="name" name="name" required>
+
+            <label for="price">Preço:</label>
+            <input type="number" id="price" name="price" step="0.01" required>
+
+            <label for="quantity">Quantidade:</label>
+            <input type="number" id="quantity" name="quantity" required>
+
+            <button type="submit" class="btn">Salvar</button>
+            <button type="button" class="btn" onclick="window.location.href='/tickets'">Cancelar</button>
+        </form>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", async () => {
+            const token = localStorage.getItem("token");
+            if (!token) {
+                window.location.href = "/login";
+                return;
+            }
+
+            // Decodificar token para verificar se o usuário é admin
+            const user = parseJwt(token);
+            if (!user || user.role !== "admin") {
+                alert("Acesso negado. Apenas administradores podem acessar esta página.");
+                window.location.href = "/tickets";
+                return;
+            }
+
+            const ticketId = "{{ticketId}}"; // Pegamos o ID passado pela rota
+
+            // Buscar os detalhes do ingresso na API
+            const response = await fetch(`/api/tickets/${ticketId}`, {
+                headers: { "Authorization": `Bearer ${token}` }
+            });
+
+            if (!response.ok) {
+                alert("Erro ao buscar os dados do ingresso.");
+                window.location.href = "/tickets";
+                return;
+            }
+
+            const ticket = await response.json();
+
+            // Preencher os campos com os dados do ingresso
+            document.getElementById("name").value = ticket.name;
+            document.getElementById("price").value = ticket.price;
+            document.getElementById("quantity").value = ticket.quantity;
+
+            // Evento de submissão do formulário
+            document.getElementById("editTicketForm").addEventListener("submit", async (event) => {
+                event.preventDefault();
+
+                const updatedTicket = {
+                    name: document.getElementById("name").value,
+                    price: document.getElementById("price").value,
+                    quantity: document.getElementById("quantity").value,
+                };
+
+                const updateResponse = await fetch(`/api/tickets/${ticketId}`, {
+                    method: "PUT",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${token}`
+                    },
+                    body: JSON.stringify(updatedTicket)
+                });
+
+                if (updateResponse.ok) {
+                    alert("Ingresso atualizado com sucesso!");
+                    window.location.href = "/tickets";
+                } else {
+                    alert("Erro ao atualizar o ingresso.");
+                }
+            });
+        });
+
+        function parseJwt(token) {
+            try {
+                return JSON.parse(atob(token.split(".")[1]));
+            } catch (e) {
+                return null;
+            }
+        }
+    </script>
+</body>
+</html>

@@ -56,7 +56,7 @@
                     <td>${ticket.quantity}</td>
                     <td>
                         ${userRole === "admin" ? `
-                            <button onclick="editTicket('${ticket._id}')">Editar</button>
+                            <button onclick="window.location.href='/tickets/edit/${ticket._id}'">Editar</button>
                             <button onclick="deleteTicket('${ticket._id}')">Excluir</button>
                         ` : `
                             <button onclick="addToCart('${ticket._id}')">+</button>

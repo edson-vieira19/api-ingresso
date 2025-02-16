@@ -71,5 +71,8 @@ router.get("/tickets/new", (req, res) => {
     res.render("newTicket");
 });
 
+router.get("/tickets/edit/:id", (req, res) => {
+    res.render("editTicket", { ticketId: req.params.id });
+});
 
 module.exports = router;
