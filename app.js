@@ -22,6 +22,7 @@ app.engine("mustache", mustacheExpress());
 app.set("view engine", "mustache");
 app.set("views", path.join(__dirname, "views"));
 
+app.use(express.static("public"));
 
 app.use("/api/users", userRoutes);
 app.use("/api/tickets", ticketRoutes);
