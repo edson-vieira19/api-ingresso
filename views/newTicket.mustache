@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastrar Novo Ingresso</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Cadastrar Novo Ingresso</h1>
+        <form id="ticketForm">
+            <label for="name">Nome do Ingresso:</label>
+            <input type="text" id="name" name="name" required>
+
+            <label for="price">Preço (R$):</label>
+            <input type="number" id="price" name="price" step="0.01" required>
+
+            <label for="quantity">Quantidade Disponível:</label>
+            <input type="number" id="quantity" name="quantity" required>
+
+            <button type="submit" class="btn">Salvar</button>
+        </form>
+        <p id="message"></p>
+        <button onclick="window.location.href='/tickets'">Cancelar</button>
+    </div>
+
+    <script>
+        document.getElementById("ticketForm").addEventListener("submit", async (event) => {
+            event.preventDefault();
+
+            const token = localStorage.getItem("token");
+            if (!token) {
+                window.location.href = "/login";
+                return;
+            }
+
+            const name = document.getElementById("name").value;
+            const price = parseFloat(document.getElementById("price").value);
+            const quantity = parseInt(document.getElementById("quantity").value);
+
+            const response = await fetch("/api/tickets", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                },
+                body: JSON.stringify({ name, price, quantity })
+            });
+
+            const result = await response.json();
+            const messageElement = document.getElementById("message");
+
+            if (response.ok) {
+                messageElement.style.color = "green";
+                messageElement.innerText = "Ingresso cadastrado com sucesso!";
+                setTimeout(() => {
+                    window.location.href = "/tickets"; // Redireciona para a lista de ingressos
+                }, 2000);
+            } else {
+                messageElement.style.color = "red";
+                messageElement.innerText = result.message || "Erro ao cadastrar ingresso.";
+            }
+        });
+    </script>
+</body>
+</html>

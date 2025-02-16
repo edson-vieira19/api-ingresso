@@ -70,7 +70,7 @@
             // Se for admin, exibir botão para cadastrar novo ingresso
             if (userRole === "admin") {
                 const addButton = document.createElement("button");
-                addButton.innerText = "Cadastrar Novo";
+                addButton.innerText = "Cadastrar Novo Ingresso";
                 addButton.onclick = () => window.location.href = "/tickets/new";
                 userActions.appendChild(addButton);
             }

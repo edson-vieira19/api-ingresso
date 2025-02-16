@@ -3,7 +3,7 @@ const User = require("../models/user");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const Purchase = require("../models/Purchase");
-const { authMiddleware } = require("../middlewares/authMiddleware");
+const { authMiddleware, adminMiddleware } = require("../middlewares/authMiddleware");
 
 const router = express.Router();
 
@@ -66,5 +66,10 @@ router.get("/", (req, res) => {
 router.get("/tickets", (req, res) => {
     res.render("tickets");
 });
+
+router.get("/tickets/new", (req, res) => {
+    res.render("newTicket");
+});
+
 
 module.exports = router;
