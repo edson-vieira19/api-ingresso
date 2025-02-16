@@ -27,7 +27,7 @@ app.use(express.static("public"));
 app.use("/api/users", userRoutes);
 app.use("/api/tickets", ticketRoutes);
 app.use("/api/purchases", purchaseRoutes);
-app.use("/api/install", installRoute);  // instala um administrador inicial
+app.use("/api/install", installRoute);  // instala um administrador inicial no sistema
 app.use(webRoutes);
 
 app.get("/", (req, res) => {

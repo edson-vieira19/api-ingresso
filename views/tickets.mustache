@@ -80,29 +80,36 @@
                 document.getElementById("buyButton").style.display = "block";
                 document.getElementById("buyButton").addEventListener("click", async () => {
                     const selectedTickets = Object.keys(cart)
-                        .filter(ticketId => cart[ticketId] > 0)
-                        .map(ticketId => ({ ticketId, quantity: cart[ticketId] }));
+        .filter(ticketId => cart[ticketId] > 0)
+        .map(ticketId => ({ ticketType: ticketId, quantity: cart[ticketId] })); // Alterado para ticketType
 
-                    if (selectedTickets.length === 0) {
-                        alert("Adicione ingressos ao carrinho antes de comprar!");
-                        return;
-                    }
+    if (selectedTickets.length === 0) {
+        alert("Adicione ingressos ao carrinho antes de comprar!");
+        return;
+    }
 
-                    const purchaseResponse = await fetch("/api/purchases", {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json",
-                            "Authorization": `Bearer ${token}`
-                        },
-                        body: JSON.stringify({ tickets: selectedTickets })
-                    });
+    try {
+        const purchaseResponse = await fetch("/api/purchases", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${localStorage.getItem("token")}`
+            },
+            body: JSON.stringify({ tickets: selectedTickets })
+        });
 
-                    if (purchaseResponse.ok) {
-                        alert("Compra realizada com sucesso!");
-                        window.location.reload();
-                    } else {
-                        alert("Erro ao realizar compra.");
-                    }
+        const responseData = await purchaseResponse.json(); // Captura o JSON da resposta
+
+        if (purchaseResponse.ok) {
+            alert("Compra realizada com sucesso!");
+            window.location.reload();
+        } else {
+            alert(`Erro ao realizar compra: ${responseData.message || "Erro desconhecido"}`);
+        }
+    } catch (error) {
+        console.error("Erro na requisição:", error);
+        alert("Erro ao conectar-se ao servidor.");
+    }
                 });
             }
 
