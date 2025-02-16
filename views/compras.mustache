@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Histórico de Compras</title>
+</head>
+<body>
+    <h2>Histórico de Compras</h2>
+    <a href="/logout">Sair</a>
+
+    {{#compras}}
+        <div>
+            <h3>Compra ID: {{_id}}</h3>
+            <p>Total: R$ {{totalPrice}}</p>
+            <a href="/compras/{{_id}}">Ver detalhes</a>
+        </div>
+    {{/compras}}
+
+    {{^compras}}
+        <p>Você ainda não comprou ingressos.</p>
+    {{/compras}}
+</body>
+</html>

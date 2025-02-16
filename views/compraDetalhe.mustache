@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalhes da Compra</title>
+</head>
+<body>
+    <h2>Detalhes da Compra</h2>
+    <p><strong>Compra ID:</strong> {{compra._id}}</p>
+    <p><strong>Total:</strong> R$ {{compra.totalPrice}}</p>
+    
+    <h3>Ingressos:</h3>
+    <ul>
+        {{#compra.tickets}}
+            <li>{{ticketType.name}} - Quantidade: {{quantity}} - Preço: R$ {{ticketType.price}}</li>
+        {{/compra.tickets}}
+    </ul>
+
+    <a href="/compras">Voltar</a>
+</body>
+</html>
