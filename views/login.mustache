@@ -1,24 +1,60 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login</title>
+    <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-    <h2>Login</h2>
-    <form action="/login" method="POST">
-        <label for="email">E-mail:</label>
-        <input type="email" name="email" required>
-        <br>
-        <label for="password">Senha:</label>
-        <input type="password" name="password" required>
-        <br>
-        <button type="submit">Entrar</button>
-    </form>
+    <div class="container">
+        <h1>Login</h1>
+        <form id="loginForm">
+            <label for="email">E-mail:</label>
+            <input type="email" id="email" name="email" required>
 
-    {{#error}}
-    <p style="color: red;">{{error}}</p>
-    {{/error}}
+            <label for="password">Senha:</label>
+            <input type="password" id="password" name="password" required>
+
+            <button type="submit" class="btn">Entrar</button>
+        </form>
+        <p id="message"></p>
+        <p>Não tem uma conta? <a href="/register">Cadastre-se</a></p>
+    </div>
+
+    <script>
+        document.getElementById("loginForm").addEventListener("submit", async (event) => {
+            event.preventDefault();
+
+            const email = document.getElementById("email").value;
+            const password = document.getElementById("password").value;
+
+            const response = await fetch("/api/users/login", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ email, password })
+            });
+
+            const result = await response.json();
+            const messageElement = document.getElementById("message");
+
+            if (response.ok) {
+                // Armazena o token no localStorage
+                localStorage.setItem("token", result.token);
+
+                messageElement.style.color = "green";
+                messageElement.innerText = "Login realizado com sucesso! Redirecionando...";
+                
+                setTimeout(() => {
+                    window.location.href = "/"; // Redireciona para a página inicial
+                }, 2000);
+            } else {
+                messageElement.style.color = "red";
+                messageElement.innerText = result.message || "Erro ao fazer login.";
+            }
+        });
+    </script>
 </body>
 </html>
