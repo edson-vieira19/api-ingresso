@@ -9,9 +9,8 @@
 <body>
     <div class="container">
         <h1>Ingressos Disponíveis</h1>
-        <div id="userActions">
-            <!-- Botão "Cadastrar Novo" aparece apenas para admin -->
-        </div>
+        <div id="userActions"></div> <!-- Ações para admin -->
+
         <table>
             <thead>
                 <tr>
@@ -21,11 +20,11 @@
                     <th>Ações</th>
                 </tr>
             </thead>
-            <tbody id="ticketList">
-                <!-- Os ingressos serão inseridos aqui -->
-            </tbody>
+            <tbody id="ticketList"></tbody>
         </table>
+
         <button id="buyButton" style="display: none;">Comprar</button>
+        <button id="logoutBtn" style="margin-top: 20px;">Sair</button>
     </div>
 
     <script>
@@ -36,7 +35,6 @@
                 return;
             }
 
-            // Obtém ingressos da API
             const response = await fetch("/api/tickets", {
                 headers: { "Authorization": `Bearer ${token}` }
             });
@@ -46,9 +44,11 @@
             const ticketList = document.getElementById("ticketList");
             const userActions = document.getElementById("userActions");
 
-            let cart = []; // Carrinho de compras
+            let cart = {}; // Carrinho de compras, agora um objeto com contadores individuais
 
             tickets.forEach(ticket => {
+                cart[ticket._id] = 0; // Inicializa contador
+
                 const row = document.createElement("tr");
                 row.innerHTML = `
                     <td>${ticket.name}</td>
@@ -60,6 +60,7 @@
                             <button onclick="deleteTicket('${ticket._id}')">Excluir</button>
                         ` : `
                             <button onclick="addToCart('${ticket._id}')">+</button>
+                            <span id="count-${ticket._id}">0</span>
                         `}
                     </td>
                 `;
@@ -78,7 +79,11 @@
             if (userRole !== "admin") {
                 document.getElementById("buyButton").style.display = "block";
                 document.getElementById("buyButton").addEventListener("click", async () => {
-                    if (cart.length === 0) {
+                    const selectedTickets = Object.keys(cart)
+                        .filter(ticketId => cart[ticketId] > 0)
+                        .map(ticketId => ({ ticketId, quantity: cart[ticketId] }));
+
+                    if (selectedTickets.length === 0) {
                         alert("Adicione ingressos ao carrinho antes de comprar!");
                         return;
                     }
@@ -89,7 +94,7 @@
                             "Content-Type": "application/json",
                             "Authorization": `Bearer ${token}`
                         },
-                        body: JSON.stringify({ tickets: cart })
+                        body: JSON.stringify({ tickets: selectedTickets })
                     });
 
                     if (purchaseResponse.ok) {
@@ -102,8 +107,8 @@
             }
 
             window.addToCart = (id) => {
-                cart.push({ ticketId: id, quantity: 1 });
-                alert("Ingresso adicionado!");
+                cart[id] += 1;
+                document.getElementById(`count-${id}`).innerText = cart[id];
             };
 
             window.editTicket = (id) => {
@@ -125,6 +130,11 @@
                     }
                 }
             };
+
+    document.getElementById("logoutBtn").addEventListener("click", () => {
+    localStorage.removeItem("token"); // Remove o token
+    window.location.href = "/"; // Redireciona para a página inicial
+});
 
             function parseJwt(token) {
                 try {
